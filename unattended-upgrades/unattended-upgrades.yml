@@ -1,0 +1,49 @@
+- name: Set up unattended upgrades
+  hosts: localhost
+  become: yes
+
+  vars:
+    mail: sysadmin@tknika.eus
+    reboot_time: 03:00
+
+  tasks:
+    - name: Configure debconf
+      debconf: name=unattended-upgrades question=unattended-upgrades/enable_auto_updates vtype=boolean value='true'
+
+    - name: Install unattended-upgrades
+      apt: name=unattended-upgrades
+
+    - name: Configure unattended-upgrades
+      command:
+        cmd: dpkg-reconfigure -f noninteractive unattended-upgrades
+        creates: /etc/apt/apt.conf.d/20auto-upgrades
+
+    - name: Enable automatic reboot
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::Automatic-Reboot \"false\";'
+        line: "Unattended-Upgrade::Automatic-Reboot \"true\";"
+
+    - name: Set automatic reboot time
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::Automatic-Reboot-Time \"02:00\";'
+        line: "Unattended-Upgrade::Automatic-Reboot-Time \"{{ reboot_time }}\";"
+
+    - name: Enable remove unused kernel packages
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::Remove-Unused-Kernel-Packages \"true\";'
+        line: "Unattended-Upgrade::Remove-Unused-Kernel-Packages \"true\";"
+
+    - name: Set notifications email address
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::Mail \"\";'
+        line: 'Unattended-Upgrade::Mail "{{ mail }}";'
+
+    - name: Set mail report level
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::MailReport \"on-change\";'
+        line: 'Unattended-Upgrade::MailReport "only-on-error";'
