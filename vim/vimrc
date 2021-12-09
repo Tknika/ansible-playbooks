@@ -1,3 +1,10 @@
+" Extend default vim config
+source $VIMRUNTIME/defaults.vim
+
 filetype plugin indent on
 autocmd FileType yaml,yml setlocal ts=2 sts=2 sw=2 expandtab
 set mouse-=a
+
+" Skip defaults settings, otherwise settings will be
+" overriden by defaults.vim
+let g:skip_defaults_vim = 1
