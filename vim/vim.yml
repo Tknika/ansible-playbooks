@@ -1,6 +1,6 @@
 ---
 - name: Config Vim
-  hosts: localhost
+  hosts: all
   become: yes
   vars:
     vimrc: "/etc/vim/vimrc.local"
